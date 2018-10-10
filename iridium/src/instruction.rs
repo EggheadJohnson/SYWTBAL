@@ -6,6 +6,9 @@ pub enum Opcode {
     SUB,
     MUL,
     DIV,
+    JMP,
+    JMPF,
+    JMPB,
     IGL
 }
 
@@ -31,6 +34,9 @@ impl From<u8> for Opcode {
             3 => Opcode::SUB,
             4 => Opcode::MUL,
             5 => Opcode::DIV,
+            6 => Opcode::JMP,
+            7 => Opcode::JMPF,
+            8 => Opcode::JMPB,
             _ => Opcode::IGL
         }
     }
