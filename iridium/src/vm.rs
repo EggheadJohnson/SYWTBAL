@@ -4,7 +4,8 @@ pub struct VM {
     registers: [i32; 32],
     pc: usize,
     program: Vec<u8>,
-    remainder: u32
+    remainder: u32,
+    equal_flag: bool,
 
 }
 
@@ -14,7 +15,8 @@ impl VM {
             registers: [0; 32],
             program: vec![],
             pc: 0,
-            remainder: 0
+            remainder: 0,
+            equal_flag: false,
         }
     }
 
@@ -83,6 +85,26 @@ impl VM {
                 let delta = self.registers[self.next_8_bits() as usize];
                 self.pc -= delta as usize;
             },
+            Opcode::EQ => {
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                if register1 == register2 {
+                    self.equal_flag = true;
+                } else {
+                    self.equal_flag = false;
+                }
+                self.next_8_bits();
+            },
+            Opcode::NEQ => {
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                if register1 == register2 {
+                    self.equal_flag = false;
+                } else {
+                    self.equal_flag = true;
+                }
+                self.next_8_bits();
+            }
             _ => {
                 println!("Unrecognized command! Terminating!");
                 return true;
@@ -230,8 +252,30 @@ mod tests {
         test_vm.registers[0] = 1;
         test_vm.program = vec![8, 0, 0, 0];
         test_vm.run_once();
-        println!("{}", test_vm.pc);
         assert_eq!(test_vm.pc, 1);
-
+    }
+    #[test]
+    fn test_eq() {
+        let mut test_vm = get_test_vm();
+        test_vm.registers[0] = 10;
+        test_vm.registers[1] = 10;
+        test_vm.program = vec![9, 0, 1, 0, 9, 0, 1, 0];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        test_vm.registers[1] = 20;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+    #[test]
+    fn test_neq() {
+        let mut test_vm = get_test_vm();
+        test_vm.registers[0] = 10;
+        test_vm.registers[1] = 10;
+        test_vm.program = vec![10, 0, 1, 0, 10, 0, 1, 0];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+        test_vm.registers[1] = 20;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
     }
 }
