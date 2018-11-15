@@ -121,6 +121,12 @@ impl VM {
                 self.equal_flag = register1 <= register2;
                 self.next_8_bits();
             },
+            Opcode::JEQ => {
+                let target = self.registers[self.next_8_bits() as usize];
+                if self.equal_flag {
+                    self.pc = target as usize;
+                }
+            }
             _ => {
                 println!("Unrecognized command! Terminating!");
                 return true;
@@ -353,5 +359,15 @@ mod tests {
         test_vm.registers[1] = 10;
         test_vm.run_once();
         assert_eq!(test_vm.equal_flag, true);
+    }
+    #[test]
+    fn test_jeq_opcode() {
+        let mut test_vm = get_test_vm();
+        test_vm.registers[0] = 7;
+        test_vm.equal_flag = true;
+        test_vm.program = vec![14, 0, 0, 0, 15, 0, 0, 0, 15, 0, 0, 0];
+        test_vm.run_once();
+        test_vm.run_once();
+        assert_eq!(test_vm.pc, 7);
     }
 }
